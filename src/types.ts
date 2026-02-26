@@ -3,6 +3,7 @@ export interface FoodEntry {
   name: string;
   quantity: string;
   timesEaten: number;
+  date: string; // YYYY-MM-DD
   createdAt: string;
   updatedAt: string;
 }
