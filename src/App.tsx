@@ -1,12 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FoodEntry } from './types';
 import { loadFoods, saveFoods, generateId } from './storage';
-import { FoodForm } from './components/FoodForm';
-import { FoodList } from './components/FoodList';
+import { Calendar } from './components/Calendar';
+import { DayModal } from './components/DayModal';
+import { Stats } from './components/Stats';
 
 function App() {
   const [foods, setFoods] = useState<FoodEntry[]>([]);
-  const [editingFood, setEditingFood] = useState<FoodEntry | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const now = new Date();
+  const [viewYear, setViewYear] = useState(now.getFullYear());
+  const [viewMonth, setViewMonth] = useState(now.getMonth());
 
   useEffect(() => {
     setFoods(loadFoods());
@@ -16,40 +21,52 @@ function App() {
     saveFoods(foods);
   }, [foods]);
 
-  const handleAddFood = (name: string, quantity: string, timesEaten: number) => {
-    const now = new Date().toISOString();
+  const handlePrevMonth = useCallback(() => {
+    setViewMonth((m) => {
+      if (m === 0) {
+        setViewYear((y) => y - 1);
+        return 11;
+      }
+      return m - 1;
+    });
+  }, []);
+
+  const handleNextMonth = useCallback(() => {
+    setViewMonth((m) => {
+      if (m === 11) {
+        setViewYear((y) => y + 1);
+        return 0;
+      }
+      return m + 1;
+    });
+  }, []);
+
+  const handleAddFood = (date: string, name: string, quantity: string, timesEaten: number) => {
+    const nowIso = new Date().toISOString();
     const newFood: FoodEntry = {
       id: generateId(),
       name,
       quantity,
       timesEaten,
-      createdAt: now,
-      updatedAt: now,
+      date,
+      createdAt: nowIso,
+      updatedAt: nowIso,
     };
     setFoods((prev) => [newFood, ...prev]);
   };
 
-  const handleUpdateFood = (name: string, quantity: string, timesEaten: number) => {
-    if (!editingFood) return;
+  const handleEditFood = (updated: FoodEntry) => {
     setFoods((prev) =>
       prev.map((f) =>
-        f.id === editingFood.id
-          ? { ...f, name, quantity, timesEaten, updatedAt: new Date().toISOString() }
+        f.id === updated.id
+          ? { ...updated, updatedAt: new Date().toISOString() }
           : f
       )
     );
-    setEditingFood(null);
   };
 
   const handleDeleteFood = (id: string) => {
     setFoods((prev) => prev.filter((f) => f.id !== id));
-    if (editingFood?.id === id) {
-      setEditingFood(null);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingFood(null);
   };
 
   return (
@@ -58,22 +75,35 @@ function App() {
         <div className="header-content">
           <span className="logo">🍼</span>
           <h1>LaviLog</h1>
-          <p>Baby Food Tracker</p>
+          <p>מעקב אוכל לתינוק</p>
         </div>
       </header>
 
       <main className="main">
-        <FoodForm
-          onSubmit={editingFood ? handleUpdateFood : handleAddFood}
-          editingFood={editingFood}
-          onCancelEdit={handleCancelEdit}
-        />
-        <FoodList
+        <Stats foods={foods} />
+
+        <Calendar
+          year={viewYear}
+          month={viewMonth}
           foods={foods}
-          onEdit={setEditingFood}
-          onDelete={handleDeleteFood}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          onDayClick={setSelectedDate}
         />
       </main>
+
+      {selectedDate && (
+        <DayModal
+          date={selectedDate}
+          foods={foods}
+          onAdd={(name, quantity, timesEaten) =>
+            handleAddFood(selectedDate, name, quantity, timesEaten)
+          }
+          onEdit={handleEditFood}
+          onDelete={handleDeleteFood}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
     </div>
   );
 }
