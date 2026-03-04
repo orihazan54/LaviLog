@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
-import { AllergenExposure, TOP_ALLERGENS } from '../types';
+import { AllergenExposure, FoodEntry, TOP_ALLERGENS, AllergenInfo } from '../types';
 import { exposureHasReaction } from '../exposureUtils';
 import { todayString } from '../utils';
+import { getFoodEmoji } from '../foodIcons';
 
 interface AllergenDashboardProps {
   exposures: AllergenExposure[];
+  foods: FoodEntry[];
   onStartExposure: (name: string) => void;
 }
 
@@ -17,24 +19,60 @@ interface AllergenRow {
   status: AllergenStatus;
   lastDate: string | null;
   daysSince: number | null;
+  isCustom?: boolean;
 }
 
-export function AllergenDashboard({ exposures, onStartExposure }: AllergenDashboardProps) {
+export function AllergenDashboard({ exposures, foods, onStartExposure }: AllergenDashboardProps) {
+  const allAllergens = useMemo<AllergenInfo[]>(() => {
+    const builtIn = [...TOP_ALLERGENS];
+    const builtInNames = new Set(builtIn.map((a) => a.nameHe.toLowerCase()));
+
+    const customNames = new Set<string>();
+    for (const f of foods) {
+      if (f.isAllergenic) {
+        const lower = f.name.toLowerCase();
+        if (!builtInNames.has(lower) && !customNames.has(lower)) {
+          customNames.add(lower);
+          builtIn.push({
+            id: `custom-${lower}`,
+            nameHe: f.name,
+            emoji: getFoodEmoji(f.name),
+          });
+        }
+      }
+    }
+
+    for (const e of exposures) {
+      if (e.status === 'cancelled') continue;
+      const lower = e.allergenName.toLowerCase();
+      if (!builtInNames.has(lower) && !customNames.has(lower)) {
+        customNames.add(lower);
+        builtIn.push({
+          id: `custom-${lower}`,
+          nameHe: e.allergenName,
+          emoji: getFoodEmoji(e.allergenName),
+        });
+      }
+    }
+
+    return builtIn;
+  }, [foods, exposures]);
+
   const rows = useMemo<AllergenRow[]>(() => {
     const today = new Date(todayString() + 'T00:00:00');
 
-    return TOP_ALLERGENS.map((allergen) => {
+    return allAllergens.map((allergen) => {
       const matching = exposures.filter(
         (e) => e.status !== 'cancelled' && e.allergenName.toLowerCase().includes(allergen.nameHe.toLowerCase())
       );
 
       if (matching.length === 0) {
-        return { ...allergen, status: 'not-tried' as const, lastDate: null, daysSince: null };
+        return { ...allergen, status: 'not-tried' as const, lastDate: null, daysSince: null, isCustom: allergen.id.startsWith('custom-') };
       }
 
       const active = matching.find((e) => e.status === 'active');
       if (active) {
-        return { ...allergen, status: 'active' as const, lastDate: active.startDate, daysSince: null };
+        return { ...allergen, status: 'active' as const, lastDate: active.startDate, daysSince: null, isCustom: allergen.id.startsWith('custom-') };
       }
 
       const hasReact = matching.some((e) => exposureHasReaction(e));
@@ -52,9 +90,10 @@ export function AllergenDashboard({ exposures, onStartExposure }: AllergenDashbo
         status: hasReact ? 'reaction' as const : 'passed' as const,
         lastDate,
         daysSince,
+        isCustom: allergen.id.startsWith('custom-'),
       };
     });
-  }, [exposures]);
+  }, [exposures, allAllergens]);
 
   const statusLabel: Record<AllergenStatus, string> = {
     'not-tried': 'לא נוסה',
@@ -81,6 +120,9 @@ export function AllergenDashboard({ exposures, onStartExposure }: AllergenDashbo
           </div>
         ))}
       </div>
+      <p className="allergen-dashboard-hint">
+        סמנו מאכל כאלרגני בעת הוספה והוא יופיע כאן אוטומטית
+      </p>
     </div>
   );
 }

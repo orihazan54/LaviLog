@@ -8,9 +8,10 @@ interface BabySetupProps {
   onDeleteBaby: (babyId: string) => void;
   onClose: () => void;
   isOnboarding?: boolean;
+  isInline?: boolean;
 }
 
-export function BabySetup({ babies, onSave, onDeleteBaby, onClose, isOnboarding = false }: BabySetupProps) {
+export function BabySetup({ babies, onSave, onDeleteBaby, onClose, isOnboarding = false, isInline = false }: BabySetupProps) {
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [emoji, setEmoji] = useState('👶');
@@ -142,6 +143,14 @@ export function BabySetup({ babies, onSave, onDeleteBaby, onClose, isOnboarding 
           <p>מעקב אוכל וחשיפות לתינוק</p>
           {content}
         </div>
+      </div>
+    );
+  }
+
+  if (isInline) {
+    return (
+      <div className="settings-card">
+        {content}
       </div>
     );
   }

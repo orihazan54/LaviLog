@@ -7,9 +7,10 @@ interface ExposureBannerProps {
   exposure: AllergenExposure;
   onLogDay: (dayIndex: number) => void;
   onCancel: () => void;
+  onCompleteAll?: () => void;
 }
 
-export function ExposureBanner({ exposure, onLogDay, onCancel }: ExposureBannerProps) {
+export function ExposureBanner({ exposure, onLogDay, onCancel, onCompleteAll }: ExposureBannerProps) {
   const completedCount = exposure.days.filter((d) => d.status === 'completed').length;
   const hasReaction = exposureHasReaction(exposure);
   const emoji = getFoodEmoji(exposure.allergenName);
@@ -26,9 +27,16 @@ export function ExposureBanner({ exposure, onLogDay, onCancel }: ExposureBannerP
             </span>
           </div>
         </div>
-        <button className="btn btn-sm btn-cancel-exposure" onClick={onCancel}>
-          ביטול חשיפה
-        </button>
+        <div className="exposure-banner-actions">
+          {onCompleteAll && completedCount < 3 && (
+            <button className="btn btn-sm btn-complete-all" onClick={onCompleteAll}>
+              ✅ השלם 3 ימים
+            </button>
+          )}
+          <button className="btn btn-sm btn-cancel-exposure" onClick={onCancel}>
+            ביטול
+          </button>
+        </div>
       </div>
 
       <div className="exposure-progress">

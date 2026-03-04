@@ -109,6 +109,5 @@ export const TOP_ALLERGENS: AllergenInfo[] = [
   { id: 'wheat', nameHe: 'חיטה', emoji: '🌾' },
   { id: 'soy', nameHe: 'סויה', emoji: '🫘' },
   { id: 'fish', nameHe: 'דגים', emoji: '🐟' },
-  { id: 'shellfish', nameHe: 'רכיכות', emoji: '🦐' },
   { id: 'sesame', nameHe: 'שומשום', emoji: '🫘' },
 ];

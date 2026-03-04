@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LaviLog</string>
+    <string name="title_activity_main">LaviLog</string>
+    <string name="package_name">com.lavilog.app</string>
+    <string name="custom_url_scheme">com.lavilog.app</string>
+</resources>
