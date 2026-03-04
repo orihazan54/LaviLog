@@ -18,19 +18,20 @@ const PREF_OPTIONS: { value: Preference; label: string }[] = [
 export function FoodForm({ onSubmit, editingFood, onCancelEdit }: FoodFormProps) {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [timesEaten, setTimesEaten] = useState(1);
+  const [timesEatenStr, setTimesEatenStr] = useState('1');
   const [date, setDate] = useState(todayString());
   const [isAllergenic, setIsAllergenic] = useState(false);
   const [preference, setPreference] = useState<Preference>('okay');
 
   const fillForm = (food: FoodEntry) => {
-    setName(food.name); setQuantity(food.quantity); setTimesEaten(food.timesEaten);
+    setName(food.name); setQuantity(food.quantity);
+    setTimesEatenStr(String(food.timesEaten));
     setDate(food.date); setIsAllergenic(food.isAllergenic);
     setPreference(food.preference ?? 'okay');
   };
 
   const resetForm = () => {
-    setName(''); setQuantity(''); setTimesEaten(1);
+    setName(''); setQuantity(''); setTimesEatenStr('1');
     setDate(todayString()); setIsAllergenic(false); setPreference('okay');
   };
 
@@ -46,10 +47,24 @@ export function FoodForm({ onSubmit, editingFood, onCancelEdit }: FoodFormProps)
     if (!editingFood && value.length > 1) setIsAllergenic(isCommonAllergen(value));
   };
 
+  const handleTimesChange = (value: string) => {
+    setTimesEatenStr(value);
+  };
+
+  const handleTimesBlur = () => {
+    const parsed = parseInt(timesEatenStr);
+    if (isNaN(parsed) || parsed < 1) {
+      setTimesEatenStr('1');
+    } else {
+      setTimesEatenStr(String(parsed));
+    }
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onSubmit(name.trim(), quantity.trim(), timesEaten, date, isAllergenic, preference);
+    const finalTimes = Math.max(1, parseInt(timesEatenStr) || 1);
+    onSubmit(name.trim(), quantity.trim(), finalTimes, date, isAllergenic, preference);
     if (!editingFood) resetForm();
   };
 
@@ -82,8 +97,10 @@ export function FoodForm({ onSubmit, editingFood, onCancelEdit }: FoodFormProps)
 
         <div className="form-group">
           <label htmlFor="food-times">מספר פעמים</label>
-          <input id="food-times" type="number" min="1" value={timesEaten}
-            onChange={(e) => setTimesEaten(Math.max(1, parseInt(e.target.value) || 1))} />
+          <input id="food-times" type="number" min="1" value={timesEatenStr}
+            onChange={(e) => handleTimesChange(e.target.value)}
+            onBlur={handleTimesBlur}
+            inputMode="numeric" />
         </div>
 
         <div className="form-group full-width">
