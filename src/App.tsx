@@ -433,6 +433,42 @@ function App() {
         </div>
       </div>
 
+      {/* Active exposure */}
+      {activeExposure && (
+        <ExposureBanner
+          exposure={activeExposure}
+          onLogDay={handleOpenExposureDayFromBanner}
+          onCancel={handleCancelExposure}
+          onCompleteAll={handleCompleteAllExposureDays}
+        />
+      )}
+
+      {/* Quick actions */}
+      <div className="quick-actions-primary">
+        <button className="quick-action-btn qa-food" onClick={() => handleTabChange('add')}>
+          <span>🍽️</span>
+          <span>הוסף מאכל</span>
+        </button>
+        <button className="quick-action-btn qa-exposure" onClick={handleStartExposureClick}>
+          <span>🧪</span>
+          <span>חשיפה חדשה</span>
+        </button>
+      </div>
+      <div className="quick-actions-secondary">
+        <button className="quick-action-btn qa-breast" onClick={() => handleQuickLog('הנקה')}>
+          <span>🤱</span>
+          <span>הנקה</span>
+        </button>
+        <button className="quick-action-btn qa-formula" onClick={() => handleQuickLog('תמ"ל')}>
+          <span>🍼</span>
+          <span>תמ"ל</span>
+        </button>
+        <button className="quick-action-btn qa-calendar" onClick={() => handleTabChange('calendar')}>
+          <span>📅</span>
+          <span>לוח שנה</span>
+        </button>
+      </div>
+
       {/* Stats row */}
       <div className="stats-grid stats-grid-3">
         <div className="stat-card-v2 stat-purple">
@@ -480,16 +516,6 @@ function App() {
         )}
       </div>
 
-      {/* Active exposure */}
-      {activeExposure && (
-        <ExposureBanner
-          exposure={activeExposure}
-          onLogDay={handleOpenExposureDayFromBanner}
-          onCancel={handleCancelExposure}
-          onCompleteAll={handleCompleteAllExposureDays}
-        />
-      )}
-
       {/* Allergen progress */}
       <div className="progress-card">
         <div className="progress-card-header">
@@ -529,30 +555,6 @@ function App() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="quick-actions quick-actions-5">
-        <button className="quick-action-btn qa-food" onClick={() => handleTabChange('add')}>
-          <span>🍽️</span>
-          <span>מאכל</span>
-        </button>
-        <button className="quick-action-btn qa-breast" onClick={() => handleQuickLog('הנקה')}>
-          <span>🤱</span>
-          <span>הנקה</span>
-        </button>
-        <button className="quick-action-btn qa-formula" onClick={() => handleQuickLog('תמ"ל')}>
-          <span>🍼</span>
-          <span>תמ"ל</span>
-        </button>
-        <button className="quick-action-btn qa-exposure" onClick={handleStartExposureClick}>
-          <span>🧪</span>
-          <span>חשיפה</span>
-        </button>
-        <button className="quick-action-btn qa-calendar" onClick={() => handleTabChange('calendar')}>
-          <span>📅</span>
-          <span>לוח שנה</span>
-        </button>
       </div>
 
       {/* Top foods */}
