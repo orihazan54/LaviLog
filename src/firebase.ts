@@ -1,11 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { Capacitor } from '@capacitor/core';
-import {
-  getAuth,
-  initializeAuth,
-  indexedDBLocalPersistence,
-  Auth,
-} from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -19,16 +13,7 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 
-function getFirebaseAuth(): Auth {
-  if (Capacitor.isNativePlatform()) {
-    return initializeAuth(app, {
-      persistence: indexedDBLocalPersistence,
-    });
-  }
-  return getAuth(app);
-}
-
-export const auth = getFirebaseAuth();
+export const auth = getAuth(app);
 
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
